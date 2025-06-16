@@ -10,10 +10,38 @@ using System.Linq;
 
 namespace TextWidgetApp
 {
+    public static class IndexManager
+    {
+        private static readonly string indexFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "index.config");
+
+        public static int Load()
+        {
+            if (!File.Exists(indexFile)) return 0;
+
+            var line = File.ReadLines(indexFile).FirstOrDefault();
+            if (line != null && line.StartsWith("Index="))
+            {
+                var indexStr = line.Substring("Index=".Length);
+                if (int.TryParse(indexStr, out int index))
+                {
+                    return index;
+                }
+            }
+
+            return 0;
+        }
+
+        public static void Save(int index)
+        {
+            File.WriteAllText(indexFile, $"Index={index}");
+        }
+    }
+
+
     public partial class MainWindow : Window
     {
         private string[] texts;
-        private int currentIndex = 0;
+        private int currentIndex = IndexManager.Load();
         private DispatcherTimer timer;
         private FileSystemWatcher watcher;
         private static readonly string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "texts.txt");
@@ -67,12 +95,13 @@ namespace TextWidgetApp
                     this.DragMove();
             };
 
+
             LoadTextFromFile();
             WatchFileChanges();
             ShowNextText();
 
             timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(1000); // change every 10s
+            timer.Interval = TimeSpan.FromSeconds(1800); // change every 30 mins
             timer.Tick += (a, b) => ShowNextText();
             timer.Start();
 
@@ -104,9 +133,9 @@ namespace TextWidgetApp
                 var block = new TextBlock
                 {
                     Text = line,
-                    Foreground = System.Windows.Media.Brushes.White,
-                    FontSize = 80,
-                    FontWeight = FontWeights.Bold,
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    FontSize = 82,
+                    FontWeight = FontWeights.ExtraBold,
                     TextWrapping = TextWrapping.Wrap,
                     TextAlignment = TextAlignment.Right,
                     Margin = new Thickness(0, 4, 0, 4),
@@ -120,6 +149,7 @@ namespace TextWidgetApp
                 currentIndex++;
 
             currentIndex %= texts.Length; // wrap around
+            IndexManager.Save(currentIndex);
         }
 
     }

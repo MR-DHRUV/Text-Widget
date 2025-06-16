@@ -10,7 +10,7 @@
         ShowInTaskbar="False"
         Title="Text Widget">
 
-    <Border Background="#55000000" CornerRadius="12" Padding="10">
+    <Border Background="Transparent" CornerRadius="12" Padding="10">
         <StackPanel x:Name="TextPanel" />
     </Border>
 </Window>
